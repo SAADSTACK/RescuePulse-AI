@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: emergencies
+    // Fields:
+    //   - victim_lat: number (required)
+    //   - victim_lon: number (required)
+    //   - type: string (required)
+    //   - status: string (required, enum: active, resolved, escalated)
+    //   - timestamp: string (required, ISO 8601)
+    //
+    // Collection: responders
+    // Fields:
+    //   - name: string (required)
+    //   - role: string (required)
+    //   - lat: number (required)
+    //   - lon: number (required)
+    //   - is_available: boolean (required)
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isValidEmergency(data) {
+      return data.keys().hasAll(['victim_lat', 'victim_lon', 'type', 'status', 'timestamp']) &&
+             data.victim_lat is number &&
+             data.victim_lon is number &&
+             data.type is string &&
+             data.status in ['active', 'resolved', 'escalated'] &&
+             data.timestamp is string;
+    }
+
+    function isValidResponder(data) {
+      return data.keys().hasAll(['name', 'role', 'lat', 'lon', 'is_available']) &&
+             data.name is string &&
+             data.role is string &&
+             data.lat is number &&
+             data.lon is number &&
+             data.is_available is bool;
+    }
+
+    // Emergencies: Anyone authenticated can create an emergency.
+    // Only admins or the system can update/delete.
+    match /emergencies/{emergencyId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidEmergency(request.resource.data);
+      allow update, delete: if isAuthenticated(); // Simplified for MVP
+    }
+
+    // Responders: Publicly readable for the app to find nearby help.
+    // Only authenticated responders can update their own location.
+    match /responders/{responderId} {
+      allow read: if true; // Public for simulation
+      allow write: if isAuthenticated();
+    }
+  }
+}

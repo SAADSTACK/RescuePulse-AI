@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "Emergency": {
+      "title": "Emergency",
+      "description": "Represents an active emergency event.",
+      "type": "object",
+      "properties": {
+        "victim_lat": { "type": "number", "description": "Latitude of the victim." },
+        "victim_lon": { "type": "number", "description": "Longitude of the victim." },
+        "type": { "type": "string", "description": "Type of emergency (e.g., Medical, Cardiac)." },
+        "status": { "type": "string", "enum": ["active", "resolved", "escalated"], "description": "Current status of the emergency." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the emergency was triggered." }
+      },
+      "required": ["victim_lat", "victim_lon", "type", "status", "timestamp"]
+    },
+    "Responder": {
+      "title": "Responder",
+      "description": "Represents a registered emergency responder.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the responder." },
+        "role": { "type": "string", "description": "Professional role (e.g., Doctor, Paramedic)." },
+        "lat": { "type": "number", "description": "Current latitude of the responder." },
+        "lon": { "type": "number", "description": "Current longitude of the responder." },
+        "is_available": { "type": "boolean", "description": "Whether the responder is currently available." }
+      },
+      "required": ["name", "role", "lat", "lon", "is_available"]
+    }
+  },
+  "firestore": {
+    "/emergencies/{emergencyId}": {
+      "schema": "Emergency",
+      "description": "Collection of active and past emergencies."
+    },
+    "/responders/{responderId}": {
+      "schema": "Responder",
+      "description": "Collection of available responders."
+    }
+  }
+}

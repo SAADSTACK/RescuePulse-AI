@@ -1,0 +1,7 @@
+{
+  "name": "RescuePulse AI",
+  "description": "Real-time emergency response system with AI-powered guidance and geolocation-based responder dispatch.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
